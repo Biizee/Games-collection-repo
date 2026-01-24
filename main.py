@@ -1,63 +1,143 @@
 import django_setup
 
 from collection.models import Genre, Game
+from django.core.exceptions import ObjectDoesNotExist
 
-#!--Creating some genres of games
-#first_genre = Genre.objects.create(
-#    name = "JRPG"
-#)
-#
-#second_genre = Genre.objects.create(
-#    name = "Roguelike"
-#)
-#
-#third_genre = Genre.objects.create(
-#    name = "Shooter"
-#)
+def list_all_games():
+    games = Game.objects.all()
+    if games:
+        for game in games:
+            print(f"\nGame id - {game.id}. \nGame name - {game.name}. \nGame release date - {game.release_date}. \nGame rating - {game.rating}. \nGame genre - {game.genre.all()}")
 
-#!--Getting genres by their id
-first_genre = Genre.objects.get(id = 1)
-second_genre = Genre.objects.get(id = 2)
-third_genre = Genre.objects.get(id = 3)
+def list_all_genres():
+    genres = Genre.objects.all()
+    if genres:
+        for genre in genres:
+            print(f"\nGenre id - {genre.id}. \nGenre name - {genre.name}.")
 
-#!--Creating some games
-#first_game = Game.objects.create(
-#    name = "Heaven for Death",
-#    release_date = "2023-01-27",
-#    rating = 9
-#)
-#
-#second_game = Game.objects.create(
-#    name = "Omori",
-#    release_date = "2020-12-25",
-#    rating = 10
-#)
-#
-#third_game = Game.objects.create(
-#    name = "Risk of Rain 2",
-#    release_date = "2020-03-28",
-#    rating = 8
-#)
-#
-#fourth_game = Game.objects.create(
-#    name = "Ultrakill",
-#    release_date = "2020-09-03",
-#    rating = 9
-#)
+def add_genre():
+    name = input("Enter genre name: ")
+    genre = Genre.objects.create(name = name)
+    print(f"Added {genre.name} genre!")
 
-#!--Getting games by their id
-first_game = Game.objects.get(id = 1)
-second_game = Game.objects.get(id = 2)
-third_game = Game.objects.get(id = 3)
-fourth_game = Game.objects.get(id = 4)
+def add_game():
+    name = input("Enter game name: ")
+    try:
+        release_date = input("Enter realese date of game (example: 2020-01-30): ")
+        rating = int(input("Enter game rating (min 1, max 10): "))
+        genre = int(input("Enter genre id: "))
+        game = Game.objects.create(
+            name = name,
+            release_date = release_date,
+            rating = rating
+        )
+        game.genre.add(genre)
+        print(f"\nGame was succesfully added!")
+    except ObjectDoesNotExist:
+        print(f"\nGenre doesn't exitsts or u made mistake. Try again!")
+    except Exception as e:
+        print(f"\nError: {e}")
 
-#!--Relating genres and games
-#first_game.genre.add(first_genre)
-#second_game.genre.add(first_genre)
-#third_game.genre.add(second_genre)
-#fourth_game.genre.add(third_genre)
+def edit_game():
+    try:
+        game_id = int(input("Enter game id: "))
+        game_id = Game.objects.get(id = game_id)
+        new_name = input("Enter new name for game (leave blank to keep current): ")
+        if new_name:
+            game_id.name = new_name
+        new_rating = input("Enter new rating for game (leave blank to keep current): ")
+        if new_rating:
+            game_id.rating = new_rating
+        new_date = input("Enter new release date for game (leave blank to keep current): ")
+        if new_date:
+            game_id.release_date = new_date
+        game_id.save()
+        print(f"\nGame was succesfully edited!")
+    except ObjectDoesNotExist:
+        print(f"\nGame doesn't exitsts. Try again!")
+    except Exception as e:
+        print(f"\nError: {e}")
 
-#!--Printing info about games and their genres
-games = Game.objects.all()
-for g in games:
-    print(g.name + " гра у жанрі " + str(g.genre.all()))
+def edit_genre():
+    try:
+        genre_id = int(input("Enter genre id: "))
+        genre_id = Genre.objects.get(id = genre_id)
+        new_name = input("Enter new name for genre (leave blank to keep current): ")
+        if new_name:
+            genre_id.name = new_name
+        genre_id.save()
+        print(f"\nGenre was succesfully edited!")
+    except ObjectDoesNotExist:
+        print(f"\nGenre doesn't exitsts. Try again!")
+    except Exception as e:
+        print(f"\nError: {e}")
+
+def delete_game():
+    try:
+        game = int(input("Enter game id: "))
+        game = Game.objects.get(id = game)
+        game.delete()
+        print("\nGame deleted succesfully!")
+    except ObjectDoesNotExist:
+        print(f"\nGame doesn't exists. Try again!")
+    except Exception as e:
+        print(f"\nError: {e}")
+
+def delete_genre():
+    try:
+        genre = int(input("Enter genre id: "))
+        genre = Genre.objects.get(id = genre)
+        genre.delete()
+        print("\nGenre deleted succesfully!")
+    except ObjectDoesNotExist:
+        print(f"\nGenre doesn't exists. Try again!")
+    except Exception as e:
+        print(f"\nError: {e}")
+
+while True:
+    print("""
+Options:
+1. List all games
+2. List all genres
+3. Add genre
+4. Add game
+5. Edit game
+6. Edit genre
+7. Delete game
+8. Delete genre
+9. Exit""")
+    
+    try:
+        choice = int(input("\nEnter your choice: "))
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    if choice == 9:
+        break
+
+    elif choice == 1:
+        list_all_games()
+    
+    elif choice == 2:
+        list_all_genres()
+
+    elif choice == 3:
+        add_genre()
+    
+    elif choice == 4:
+        add_game()
+    
+    elif choice == 5:
+        edit_game()
+    
+    elif choice == 6:
+        edit_genre()
+    
+    elif choice == 7:
+        delete_game()
+    
+    elif choice == 8:
+        delete_genre()
+
+    else:
+        print("Invalid choice, try again!")
